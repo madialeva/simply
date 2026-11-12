@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Simply.Cli/Simply.Cli.csproj" />
+    <Project Path="src/Simply.Core/Simply.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Simply.Core.Tests/Simply.Core.Tests.csproj" />
+  </Folder>
+</Solution>

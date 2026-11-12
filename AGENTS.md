@@ -61,12 +61,17 @@ OpenSpec aprobado.
    código en tiempo de compilación, nunca `[DllImport]`) junto con
    `[SuppressGCTransition]` en llamadas frecuentes a las APIs nativas de CUDA en
    Linux (`libcudart.so`, `libcublas.so`, `libcuda.so`).
-4. **Configuración de compilación:** todos los proyectos C# apuntan a `net10.0`
-   con `LangVersion` en C# 14, `<Nullable>enable</Nullable>`,
-   `<ImplicitUsings>enable</ImplicitUsings>` y
-   `<AllowUnsafeBlocks>true</AllowUnsafeBlocks>` donde se manipulen punteros o
-   bloques nativos. El código debe compilar sin advertencias (`dotnet build
-   -warnaserror`).
+4. **Configuración de compilación:** el SDK de .NET 10 se fija en `global.json`
+   y el manifiesto de herramientas locales en `dotnet-tools.json`. Todos los
+   proyectos C# heredan de `Directory.Build.props` `net10.0` con `LangVersion`
+   en C# 14, `<Nullable>enable</Nullable>`,
+   `<ImplicitUsings>enable</ImplicitUsings>`,
+   `<AllowUnsafeBlocks>true</AllowUnsafeBlocks>`,
+   `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`,
+   `<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>` y
+   `<AnalysisLevel>latest-recommended</AnalysisLevel>`, con las reglas de estilo
+   en `.editorconfig`. El código debe pasar `dotnet format --verify-no-changes`
+   y compilar sin advertencias (`dotnet build -warnaserror`).
 5. **Testing y benchmarking:** los tests unitarios y de verificación matemática
    se escriben con **xUnit** (`xunit.v3`) en `tests/Simply.Core.Tests`. Para
    microbenchmarks de operadores, tokenizador y kernels se emplea
@@ -78,10 +83,11 @@ OpenSpec aprobado.
 
 ## Organización del código
 
-El código fuente bajo `src/` y las pruebas bajo `tests/` se organizan por
-responsabilidad:
+El repositorio se estructura con los directorios estándar de ingeniería .NET:
 
 ```text
+eng/                         scripts de ingeniería, targets MSBuild (.targets) y lockfiles
+artifacts/                   salidas de build/herramientas y binarios descargados (ignorado en git)
 src/
 ├── Simply.Core/             núcleo del motor: GGUF, memoria nativa, tensores,
 │                            tokenizador, sampling, operadores CPU y backends
@@ -92,7 +98,7 @@ src/
 │   ├── Compute/             IComputeBackend, backend CPU (SIMD) y backend CUDA
 │   ├── Interop/             enlaces [LibraryImport] para libcudart, libcublas y libcuda
 │   └── Models/              arquitecturas Transformer, capas, GQA y KV Cache
-├── Simply.Kernels/          archivos fuente CUDA (.cu) y scripts/targets de compilación a .ptx
+├── Simply.Kernels/          archivos fuente CUDA (.cu) compilados a .ptx/.cubin
 └── Simply.Cli/              ejecutable de consola para inspección GGUF, benchmarks e inferencia
 tests/
 └── Simply.Core.Tests/       tests unitarios (xUnit) y de verificación matemática por fase/hito
