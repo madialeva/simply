@@ -1,0 +1,61 @@
+# AI & IDE local folders
+.agents/
+.claude/
+.opencode/
+.gemini/
+.vscode/
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# .NET build outputs
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+out/
+publish/
+artifacts/
+
+# Test & Benchmark results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+BenchmarkDotNet.Artifacts/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+# NuGet packages & caches
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.assets.json
+*.rsuser
+
+# CUDA build artifacts & intermediates
+*.ptx
+*.cubin
+*.fatbin
+*.cudafe1.*
+*.cudafe2.*
+*.module_id
+*.reg.c
+*.linkinfo
+
+# Local LLM weights & binary model files
+*.gguf
+models/
+
+# OS & temporary files
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+*.tmp
