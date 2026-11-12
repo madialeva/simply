@@ -8,5 +8,5 @@
 
 ## 2. Solución `.slnx`, proyecto `Simply.Core.Tests` y validación integral
 
-- [ ] 2.1 Crear `tests/Simply.Core.Tests/Simply.Core.Tests.csproj` (referenciando a `Simply.Core` y a los paquetes `Microsoft.NET.Test.Sdk`, `xunit.v3`, `xunit.runner.visualstudio` y `BenchmarkDotNet` sin atributo `Version` inline) y un test unitario inicial en `EngineInfoTests.cs` que valide `EngineInfo` y el soporte de bloques `unsafe`, verificando que compila sin advertencias
-- [ ] 2.2 Crear `Simply.slnx` en la raíz agrupando `/src/` y `/tests/`, y verificar que `dotnet format Simply.slnx --verify-no-changes`, `dotnet build Simply.slnx -warnaserror` y `dotnet test Simply.slnx` pasan con `0` errores y `0` advertencias
+- [x] 2.1 Crear `tests/Simply.Core.Tests/Simply.Core.Tests.csproj` (referenciando a `Simply.Core` y a los paquetes `Microsoft.NET.Test.Sdk`, `xunit.v3`, `xunit.runner.visualstudio` y `BenchmarkDotNet` sin atributo `Version` inline) y un test unitario inicial en `EngineInfoTests.cs` que valide `EngineInfo` y el soporte de bloques `unsafe`, verificando que compila sin advertencias
+- [x] 2.2 Crear `Simply.slnx` en la raíz agrupando `/src/` y `/tests/`, y verificar que `dotnet format Simply.slnx --verify-no-changes`, `dotnet build Simply.slnx -warnaserror` y `dotnet test Simply.slnx` pasan con `0` errores y `0` advertencias
