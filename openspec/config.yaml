@@ -1,32 +1,38 @@
 schema: spec-driven
 
-# Project context (optional)
-# Add only constraints that should guide OpenSpec artifacts and workflows.
-# Include constraints an agent cannot infer by reading the code.
-# Keep general project documentation and discoverable codebase facts out.
-# Example:
-#   context: |
-#     Designs and tasks must cover Windows, macOS, and Linux
-#     Write all artifacts in Spanish
+context: |
+  Project: Simply — a from-scratch local LLM inference engine (llama.cpp style) built for learning and low-level systems mastery.
+  Target platform & stack: Linux (linux-x64) exclusively, C# 14 / .NET 10 (net10.0), CUDA 13.x (libcudart.so, libcublas.so, libcuda.so, custom .cu kernels compiled with nvcc to .ptx/.cubin). Never add code paths or workarounds for Windows, macOS, or older .NET/CUDA versions.
+  Core principles:
+  - Zero-GC in the inference loop: tensors, weights, activations, and KV Cache live in unmanaged memory (NativeMemory.AlignedAlloc aligned to 64 bytes), memory-mapped files (MemoryMappedFile), or GPU VRAM.
+  - Flat data representation: Span<T>, ReadOnlySpan<T>, ref struct, unsafe pointers, [InlineArray], and [StructLayout(LayoutKind.Sequential, Pack = 1)]. Avoid heap allocations in hot paths and tokenization (use AlternateLookup on dictionaries).
+  - Zero-cost native interop: always use [LibraryImport] (never [DllImport]) with [SuppressGCTransition] on frequent CUDA calls.
+  - Zero third-party production dependencies: rely strictly on the .NET 10 BCL (System.Numerics.Tensors, System.Runtime.Intrinsics, System.IO.MemoryMappedFiles, etc.).
+  - Solution & testing: Simply.slnx, global.json (pinning .NET 10 SDK), dotnet-tools.json, .editorconfig, Directory.Build.props (Single source of truth for Version, net10.0, C# 14, Nullable, ImplicitUsings, AllowUnsafeBlocks, TreatWarningsAsErrors, EnforceCodeStyleInBuild, AnalysisLevel), Central Package Management in Directory.Packages.props, eng/ (engineering scripts and MSBuild targets), artifacts/ (git-ignored build/downloaded outputs), xunit.v3 for unit/math tests, and BenchmarkDotNet for microbenchmarks.
+  Language conventions:
+  - Write all OpenSpec artifact prose (proposal.md, design.md, tasks.md, specs/*.md) in Spanish.
+  - Keep fixed OpenSpec headings and keywords in English as-is (Why, What Changes, Capabilities, Impact, Context, Goals, Non-Goals, Decisions, Risks / Trade-offs, Migration Plan, Open Questions, Purpose, ADDED/MODIFIED/REMOVED/RENAMED Requirements, Requirement:, Scenario:, WHEN/THEN/AND, SHALL/MUST).
+  - Keep code identifiers, C# types, CLI commands, and package names in English.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Write prose in Spanish while keeping structural section headers in English.
+    - Keep proposals focused and concise.
+  design:
+    - Write prose in Spanish while keeping structural section headers in English.
+    - Always include explicit Goals and Non-Goals sections.
+    - Detail memory layout, Zero-GC guarantees, and BCL/SIMD/CUDA boundaries where applicable.
+  specs:
+    - Keep Requirement:, Scenario:, ADDED/MODIFIED/REMOVED/RENAMED Requirements headers, and WHEN/THEN/AND/SHALL/MUST keywords in English; write the requirement and scenario descriptions in Spanish.
+  tasks:
+    - Organize tasks into numbered groups (e.g., "## 1. ...", "## 2. ...") so each group corresponds to one atomic git commit ("[is<n>] <English summary> (group <k>)").
+    - Include build ("dotnet build -warnaserror") and test ("dotnet test") verification within the task groups.
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+operations:
+  apply:
+    guidance:
+      - Implement one task group at a time, verify "dotnet build -warnaserror" and "dotnet test", mark the group's checkboxes in tasks.md, and commit with "[is<n>] <Summary> (group <k>)" and "Refs #<n>" in the commit body.
+  archive:
+    guidance:
+      - Sync delta specs and move the change to openspec/changes/archive/YYYY-MM-DD-is<n>-<slug>/ on the same branch before opening a PR, committing with "[is<n>] Archive the <slug> change".
+      - Review Non-Goals in design.md and propose follow-up GitHub issues for any pending work.
