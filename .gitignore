@@ -50,7 +50,7 @@ project.assets.json
 
 # Local LLM weights & binary model files
 *.gguf
-models/
+/models/
 
 # OS & temporary files
 .DS_Store
