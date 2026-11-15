@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Standalone measurement program for docs/revision-inicial.md. Not part of Simply.slnx. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Simply.Examples.CpuProbes</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <!-- TensorPrimitives ships as a NuGet package. Pin it here instead of adding it to Directory.Packages.props. -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Numerics.Tensors" Version="10.0.15" />
+  </ItemGroup>
+
+</Project>

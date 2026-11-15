@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define la estructura de solución `.slnx`, los directorios estándar (`eng/`, `artifacts/`, `src/`, `tests/`), los manifiestos JSON de SDK y herramientas (`global.json`, `dotnet-tools.json`), las propiedades globales de compilación y estilo (`.editorconfig`, `Directory.Build.props`), y la gestión centralizada de paquetes (`Directory.Packages.props`) sin dependencias de terceros en producción.
+Define la estructura de solución `.slnx`, los directorios estándar (`eng/`, `artifacts/`, `src/`, `tests/`), los manifiestos JSON de SDK y herramientas (`global.json`, `dotnet-tools.json`), las propiedades globales de compilación y estilo (`.editorconfig`, `Directory.Build.props`), y la gestión centralizada de paquetes (`Directory.Packages.props`) junto con la política de dependencias de producción.
 
 ## Requirements
 
@@ -18,7 +18,7 @@ El repositorio SHALL incluir en su raíz los archivos `global.json` y `dotnet-to
 - **THEN** el comando procesa `dotnet-tools.json` (`isRoot: true`) y finaliza con código de salida `0`
 
 ### Requirement: Modern XML solution and repository directory structure
-El repositorio SHALL organizarse en torno a `Simply.slnx` en la raíz (agrupando `src/Simply.Core`, `src/Simply.Cli` y `tests/Simply.Core.Tests`), manteniendo además los directorios estándar `eng/` (versionado), `src/Simply.Kernels/` (versionado) y `artifacts/` (ignorado en git).
+El repositorio SHALL organizarse en torno a `Simply.slnx` en la raíz (agrupando `src/Simply.Core`, `src/Simply.Cli` y `tests/Simply.Core.Tests`), manteniendo además los directorios estándar `eng/` (versionado) y `src/Simply.Kernels/` (versionado), y reservando `artifacts/` para las salidas de compilación y herramientas y las descargas locales, que nunca se versionan.
 
 #### Scenario: Solution builds all projects cleanly
 - **WHEN** el desarrollador ejecuta `dotnet build Simply.slnx -warnaserror` en la raíz del repositorio
@@ -28,31 +28,34 @@ El repositorio SHALL organizarse en torno a `Simply.slnx` en la raíz (agrupando
 - **WHEN** se inspeccionan las referencias de proyecto en `src/`
 - **THEN** `Simply.Cli` MUST referenciar a `Simply.Core`, mientras que `Simply.Core` SHALL NOT tener referencias a `Simply.Cli` ni a ningún otro proyecto de interfaz
 
-#### Scenario: Engineering and artifacts directories exist
-- **WHEN** se inspecciona el árbol de directorios del repositorio
-- **THEN** existen `eng/`, `src/Simply.Kernels/` y `artifacts/`, estando `artifacts/` excluido del control de versiones mediante `.gitignore`
+#### Scenario: Engineering directories exist and artifacts are ignored
+- **WHEN** se inspecciona el árbol de directorios de un clon del repositorio
+- **THEN** existen `eng/` y `src/Simply.Kernels/`, y `.gitignore` excluye `artifacts/` del control de versiones, exista o no ese directorio
 
 ### Requirement: Centralized compiler settings, code style, and version source of truth
 La configuración común de compilación y la versión del proyecto SHALL residir en `Directory.Build.props`, acompañada de `.editorconfig` en la raíz para hacer cumplir el estilo de código en compilación y con `dotnet format`.
 
 #### Scenario: Target framework, C# 14 flags, and analyzers applied globally
 - **WHEN** se compila cualquier proyecto de la solución sin redefinir propiedades en su `.csproj`
-- **THEN** el proyecto MUST heredar `TargetFramework` igual a `net10.0`, `LangVersion` en C# 14 (`14.0` o `latest`), `Nullable` en `enable`, `ImplicitUsings` en `enable`, `AllowUnsafeBlocks` en `true`, `TreatWarningsAsErrors` en `true`, `EnforceCodeStyleInBuild` en `true`, `AnalysisLevel` en `latest-recommended` y `Version` igual a `1.0.0`
+- **THEN** el proyecto MUST heredar `TargetFramework` igual a `net10.0`, `LangVersion` en C# 14 (`14.0` o `latest`), `Nullable` en `enable`, `ImplicitUsings` en `enable`, `AllowUnsafeBlocks` en `true`, `TreatWarningsAsErrors` en `true`, `EnforceCodeStyleInBuild` en `true`, `AnalysisLevel` en `latest-recommended` y `Version` igual al sufijo de la rama `develop/vX.Y.Z` activa (por ejemplo, `1.0.0` en `develop/v1.0.0`)
 
 #### Scenario: Code formatting verification passes
 - **WHEN** se ejecuta `dotnet format Simply.slnx --verify-no-changes`
 - **THEN** el comando finaliza con código de salida `0` confirmando que todos los archivos cumplen `.editorconfig`
 
-### Requirement: Central Package Management with zero third-party production dependencies
-La gestión de versiones de paquetes NuGet SHALL realizarse de forma centralizada mediante `Directory.Packages.props` (`ManagePackageVersionsCentrally` en `true`), y los proyectos de producción bajo `src/` MUST NOT depender de paquetes NuGet de terceros.
+### Requirement: Central Package Management
+La gestión de versiones de paquetes NuGet SHALL realizarse de forma centralizada mediante `Directory.Packages.props` (`ManagePackageVersionsCentrally` en `true`).
 
-#### Scenario: Production projects rely strictly on .NET 10 BCL
-- **WHEN** se inspeccionan `src/Simply.Core/Simply.Core.csproj` y `src/Simply.Cli/Simply.Cli.csproj`
-- **THEN** ninguno de los dos proyectos contiene elementos `<PackageReference>` a librerías externas de terceros
+#### Scenario: Package versions resolved centrally
+- **WHEN** cualquier proyecto de `Simply.slnx` declara un elemento `<PackageReference>`
+- **THEN** el elemento no especifica el atributo `Version`, y la versión se resuelve desde `<PackageVersion>` en `Directory.Packages.props`
 
-#### Scenario: Test and benchmark packages managed centrally without inline versions
-- **WHEN** `tests/Simply.Core.Tests/Simply.Core.Tests.csproj` declara sus referencias a `xunit.v3`, `Microsoft.NET.Test.Sdk`, `xunit.runner.visualstudio` y `BenchmarkDotNet`
-- **THEN** ningún elemento `<PackageReference>` en el `.csproj` especifica el atributo `Version`, resolviéndose todas las versiones desde `<PackageVersion>` en `Directory.Packages.props`
+### Requirement: Production dependency policy
+Los proyectos de producción bajo `src/` MAY depender de paquetes NuGet que aporten infraestructura genérica que no es objeto de aprendizaje, como `System.Numerics.Tensors`, pero MUST NOT depender de paquetes que implementen piezas del motor.
+
+#### Scenario: Production packages are generic infrastructure
+- **WHEN** se inspeccionan los elementos `<PackageReference>` de los proyectos bajo `src/`
+- **THEN** cada paquete aporta infraestructura genérica, y ninguno es una librería de inferencia o *machine learning* (como `LLamaSharp`, `ONNX Runtime`, `TorchSharp` o `ML.NET`) ni implementa lectura de GGUF, tokenización, cuantización o kernels
 
 ### Requirement: Minimal CLI entry point and test execution
 El proyecto `Simply.Cli` SHALL incluir un `Program.cs` inicial mínimo que finalice sin errores, y `Simply.Core.Tests` SHALL ejecutar su suite de pruebas mediante `dotnet test`.

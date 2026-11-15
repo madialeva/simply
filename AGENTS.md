@@ -15,33 +15,42 @@ con `nvcc` a `.ptx` / `.cubin`) para la aceleración por hardware en GPU. No
 añadir rutas de código, condicionales ni *workarounds* para Windows, macOS u
 otras versiones de .NET o CUDA.
 
-La hoja de ruta técnica y los hitos de verificación se encuentran en
-`docs/engine-inferencia-c#.md` y estructuran el desarrollo en cuatro fases:
+La hoja de ruta técnica, con los conceptos, los pasos y los hitos de
+verificación de cada fase, está en `docs/engine-inferencia-roadmap.md`. Organiza
+el desarrollo en una fase preparatoria y cuatro fases:
 
-1. **Fase 1 — Ingesta Zero-Copy (GGUF) y Tokenización:** lectura de archivos
-   `.gguf` mediante `MemoryMappedFile` (`TensorView` sobre punteros nativos sin
-   copiar tensores al *Managed Heap*), tokenizador BPE/SentencePiece libre de
-   alojamientos temporales y pipeline de *sampling* (*Temperature*, *Top-K*,
-   *Top-P*, *Min-P*, penalización por repetición).
-2. **Fase 2 — Transformer en CPU (`FP32` / `FP16`):** asignador lineal sobre
-   memoria nativa (`NativeArena` con `NativeMemory.AlignedAlloc` alineado a 64
-   bytes) y operadores matemáticos fundamentales (Embedding Lookup, `RMSNorm`,
-   `RoPE`, `GEMV`/`GEMM`, `GQA` + *KV Cache*, `SwiGLU`) vectorizados con
-   `TensorPrimitives` y `System.Runtime.Intrinsics` (AVX2 / AVX-512).
-3. **Fase 3 — Salto a GPU con Backends Estándar (`cudart` + `cuBLAS`):**
-   abstracción `IComputeBackend` e interoperabilidad con CUDA Runtime y `cuBLAS`
-   en precisión estándar (`FP16` / `BF16`).
-4. **Fase 4 — Cuantización Propia y Kernels CUDA a Medida:** formatos de
-   cuantización por bloques (`BlockQ4_Custom` con `[InlineArray]`) y kernels
-   CUDA propios (`.cu` -> `.ptx` / `.cubin`) con des-cuantización al vuelo y
-   reducción *warp-level* (`__shfl_xor_sync`), cargados y ejecutados mediante el
-   CUDA Driver API.
+0. **Fase 0 — Banco de pruebas:** CI, llama.cpp como oráculo (herramienta
+   externa compilada aparte, nunca dependencia), descarga verificada de los
+   modelos de referencia y medición del ancho de banda de RAM y VRAM.
+1. **Fase 1 — Del fichero a los tokens:** lectura de archivos `.gguf` mediante
+   `MemoryMappedFile` (`TensorView` sobre punteros nativos sin copiar tensores
+   al *Managed Heap*), inspector de modelos y tokenizador BPE a nivel de bytes
+   con resultados idénticos a `llama-tokenize`.
+2. **Fase 2 — Transformer en CPU (`FP32`):** asignador lineal sobre memoria
+   nativa (`NativeArena` con `NativeMemory.AlignedAlloc` alineado a 64 bytes),
+   operadores (Embedding Lookup, `RMSNorm`, `RoPE`, `GEMV`/`GEMM`, `GQA` +
+   *KV Cache*, `SwiGLU`) con `TensorPrimitives` y `System.Runtime.Intrinsics`
+   (`Vector256` con AVX2 y FMA; la máquina de desarrollo no tiene AVX-512), y
+   bucle de generación con *sampling* (penalización por repetición, *Top-K*,
+   *Top-P*, *Min-P* y *Temperature*) y chat.
+3. **Fase 3 — GPU con cuBLAS (`FP16`):** abstracción `IComputeBackend`,
+   interoperabilidad con el CUDA Driver API y `cuBLAS`, y kernels propios
+   sencillos para el resto de operadores.
+4. **Fase 4 — Cuantización y kernels CUDA propios:** formatos por bloques
+   compatibles con GGML (`Q8_0` y `Q4_0`, con `BlockQ4` sobre `[InlineArray]`)
+   y variantes propias, y kernels (`.cu` -> `.ptx` / `.cubin`) con
+   des-cuantización al vuelo y reducción *warp-level* (`__shfl_xor_sync`),
+   cargados y ejecutados mediante el CUDA Driver API.
 
-No se deben introducir librerías externas de inferencia o *machine learning* de
-alto nivel (como `LLamaSharp`, `ONNX Runtime`, `TorchSharp` o `ML.NET`) en el
-código de producción: el objetivo del proyecto es implementar y comprender cada
-pieza desde cero. No añadir dependencias de producción nuevas sin un cambio de
-OpenSpec aprobado.
+Se pueden usar paquetes NuGet que aporten infraestructura genérica que no es
+objeto de aprendizaje, como `System.Numerics.Tensors` (`TensorPrimitives`), que
+no forma parte de la BCL. No se permiten en el código de producción paquetes
+que implementen piezas del motor: librerías de inferencia o *machine learning*
+(como `LLamaSharp`, `ONNX Runtime`, `TorchSharp` o `ML.NET`), lectores de GGUF,
+tokenizadores, cuantizadores o kernels; el objetivo del proyecto es implementar
+y comprender esas piezas desde cero. Cada dependencia de producción nueva
+requiere un cambio de OpenSpec aprobado y fija su versión en
+`Directory.Packages.props`.
 
 ## Principios arquitectónicos y convenciones de C# / .NET 10
 
@@ -49,7 +58,9 @@ OpenSpec aprobado.
    intervenir durante la generación de tokens. Todos los tensores (pesos,
    activaciones y *KV Cache*) se alojan en memoria no administrada
    (`NativeMemory.AlignedAlloc`), archivos mapeados en memoria
-   (`MemoryMappedFile`) o directamente en la VRAM de la GPU.
+   (`MemoryMappedFile`) o directamente en la VRAM de la GPU. La carga del
+   modelo sí puede alojar objetos gestionados; el bucle de generación no, y los
+   tests lo comprueban midiendo los bytes alojados por token.
 2. **Representación plana de datos:** uso intensivo de `Span<T>`,
    `ReadOnlySpan<T>`, `ref struct`, punteros crudos (`unsafe`), `[InlineArray]`
    y `[StructLayout(LayoutKind.Sequential, Pack = 1)]` para mapear bloques
@@ -58,9 +69,13 @@ OpenSpec aprobado.
    el *heap* (apoyarse en `Span<char>`, UTF-8 directo y `AlternateLookup` en
    diccionarios).
 3. **Interop de coste cero:** usar siempre `[LibraryImport]` (generadores de
-   código en tiempo de compilación, nunca `[DllImport]`) junto con
-   `[SuppressGCTransition]` en llamadas frecuentes a las APIs nativas de CUDA en
-   Linux (`libcudart.so`, `libcublas.so`, `libcuda.so`).
+   código en tiempo de compilación, nunca `[DllImport]`) para las APIs nativas
+   de CUDA en Linux (`libcuda.so`, `libcublas.so` y, si llega a usarse,
+   `libcudart.so`). Cuando `cuda.h` redefine una función a un símbolo
+   versionado (`cuMemAlloc` -> `cuMemAlloc_v2`), el `EntryPoint` debe nombrar
+   el símbolo real. Reservar `[SuppressGCTransition]` para funciones nativas
+   triviales (menos de 1 µs, sin bloqueos) en las que una medición demuestre
+   beneficio; no usarlo en llamadas de CUDA.
 4. **Configuración de compilación:** el SDK de .NET 10 se fija en `global.json`
    y el manifiesto de herramientas locales en `dotnet-tools.json`. Todos los
    proyectos C# heredan de `Directory.Build.props` `net10.0` con `LangVersion`
@@ -94,7 +109,7 @@ src/
 │   ├── Gguf/                parser de cabeceras, metadatos y mmap (TensorView)
 │   ├── Memory/              NativeArena y gestión de memoria no administrada
 │   ├── Tokenization/        tokenizador BPE/SentencePiece y pipeline de sampling
-│   ├── Tensors/             primitivas matemáticas, tipos cuantizados (BlockQ4_Custom)
+│   ├── Tensors/             primitivas matemáticas, tipos cuantizados (BlockQ4, BlockQ8)
 │   ├── Compute/             IComputeBackend, backend CPU (SIMD) y backend CUDA
 │   ├── Interop/             enlaces [LibraryImport] para libcudart, libcublas y libcuda
 │   └── Models/              arquitecturas Transformer, capas, GQA y KV Cache
