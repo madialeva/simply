@@ -5,11 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup Label="Production">
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="System.CommandLine" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup Label="Testing">
-    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="xunit.v3" Version="4.0.3" />
   </ItemGroup>
 

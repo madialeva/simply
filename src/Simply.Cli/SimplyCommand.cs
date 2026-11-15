@@ -1,4 +1,5 @@
 using System.CommandLine;
+using Simply.Cli.Commands;
 
 namespace Simply.Cli;
 
@@ -15,5 +16,8 @@ internal static class SimplyCommand
     /// Creates the root command with every available subcommand.
     /// </summary>
     /// <returns>The root command, ready to parse a command line.</returns>
-    internal static RootCommand Create() => new("Simply, an LLM inference engine written from scratch in C# and CUDA.");
+    internal static RootCommand Create() => new("Simply, an LLM inference engine written from scratch in C# and CUDA.")
+    {
+        BenchCommand.Create(),
+    };
 }

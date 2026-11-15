@@ -81,7 +81,11 @@ Las suites usan el *toolchain* en proceso de BenchmarkDotNet (`InProcessEmitTool
   - Tamaño: 256 KiB, que cabe en la L2 de 512 KiB por núcleo; 8 MiB, que cabe en la L3 de 16 MiB; y 1 GiB, que solo cabe en la RAM.
   - Hilos: 1 y `Environment.ProcessorCount`. Con varios hilos, cada uno suma un tramo contiguo del bloque.
   - La cifra de 1 GiB con todos los hilos es la que se compara con el techo de RAM de la hoja de ruta.
-- **Primeras cifras (comprobado, un hilo, `--quick`).** 92 GB/s en L2, 84 GB/s en L3 y 27 GB/s en RAM. Un solo hilo no satura la RAM, y de ahí el parámetro de hilos.
+- **Primeras cifras (comprobado con la suite terminada y `--quick`).**
+  - Con un hilo: 92 GB/s en L2, 84 GB/s en L3 y 26 GB/s en RAM.
+  - Con los 12 hilos: 65 GB/s con 256 KiB, 253 GB/s con 8 MiB y 35 GB/s con 1 GiB.
+  - Un solo hilo no satura la RAM: con todos se acerca al techo de 36,5 GB/s de la hoja de ruta.
+  - Con 256 KiB, repartir entre 12 hilos es más lento que con uno, porque el coste de sincronizar `Parallel.For` (unos microsegundos) supera al de leer el bloque. La misma cuenta habrá que hacerla al repartir los GEMV entre hilos en la Fase 2.
 - **Salida.** Una columna propia de BenchmarkDotNet (`IColumn`) calcula los GB/s a partir del tamaño y del tiempo medio.
 - **Opciones.**
   - `--quick` usa el *job* corto de BenchmarkDotNet (`ShortRun`, 3 iteraciones). En el prototipo, los tres tamaños con un hilo tardaron 21 s, frente a varios minutos con el *job* por defecto.

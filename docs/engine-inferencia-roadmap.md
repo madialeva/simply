@@ -160,7 +160,7 @@ Buenas prácticas:
 1. **CI** en GitHub Actions (`pull_request` y `workflow_dispatch`) con `dotnet format --verify-no-changes`, `dotnet build -warnaserror` y `dotnet test`. Los *runners* no tienen modelos ni GPU, así que excluye los tests marcados con los *traits* `RequiresModel` y `RequiresGpu` (`--filter-not-trait`). Los tests corren sobre Microsoft.Testing.Platform: si el filtro deja un proyecto sin tests, ese proyecto termina con el código de salida 8 y `dotnet test` falla, salvo que se añada `--ignore-exit-code 8` (comprobado).
 2. **Script de modelos** en `eng/`, que descargue los modelos de referencia a `artifacts/models/` y verifique su SHA-256.
 3. **llama.cpp** compilado en sus dos variantes, con el commit fijado.
-4. **Medición del hardware**: ancho de banda de RAM y VRAM con microbenchmarks propios, y velocidad de llama.cpp con `llama-bench`.
+4. **Medición del hardware**: ancho de banda de RAM y VRAM con microbenchmarks propios, y velocidad de llama.cpp con `llama-bench`. El de RAM lo mide `simply bench memory`, que lee bloques del tamaño de L2, L3 y RAM con un hilo y con todos; compara la cifra de RAM con todos los hilos con la tabla de techos. Un solo hilo no satura la RAM.
 
 **Hito 0.**
 
@@ -520,7 +520,7 @@ El producto Q4_0 × Q8_0 con AVX2. Aquí `TensorPrimitives` ya no ayuda y los in
 - **Contra el oráculo** (*trait* `RequiresModel`): fixtures generados con llama.cpp, con su commit y el SHA-256 del modelo.
 - **En GPU** (*trait* `RequiresGpu`): siempre frente al backend de CPU.
 - **Alojamientos:** 0 B por token, comprobado en un test.
-- **Rendimiento:** BenchmarkDotNet en Release para los operadores (la revisión, en su punto 1.4, propone un proyecto aparte) y `Stopwatch` en `Simply.Cli` para tokens/s y GB/s.
+- **Rendimiento:** suites de `simply bench`, en `src/Simply.Benchmarks` y solo en Release: BenchmarkDotNet, dentro del proceso, para la memoria (`memory`) y los operadores (`ops`), y `Stopwatch` para tokens/s y GB/s del motor (`model`).
 - **Comparaciones numéricas:** error relativo L2 (`‖a − b‖ / ‖b‖`) o similitud coseno, nunca igualdad exacta en coma flotante. La tabla de la sección 3.3 da órdenes de magnitud para un GEMV. En generación, las divergencias solo se aceptan en casi empates.
 
 ## Referencias
