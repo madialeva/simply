@@ -102,18 +102,24 @@ requiere un cambio de OpenSpec aprobado y fija su versión en
    - **Llaves** en todas las sentencias de control (IDE0011) y ninguna
      directiva `using` sin usar (IDE0005).
 5. **Testing y benchmarking:** los tests unitarios y de verificación matemática
-   se escriben con **xUnit** (`xunit.v3`) en `tests/Simply.Core.Tests` y se
+   se escriben con **xUnit** (`xunit.v3`) en `tests/` (`Simply.Core.Tests`
+   para el núcleo y `Simply.Cli.Tests` para la herramienta `simply`) y se
    ejecutan sobre **Microsoft.Testing.Platform**, sin VSTest ni sus paquetes
    (`Microsoft.NET.Test.Sdk`, `xunit.runner.visualstudio`). El proyecto de
    tests es un ejecutable: se lanza con `dotnet test`, con
    `dotnet run --project tests/Simply.Core.Tests` o directamente, y en los tres
-   casos acepta las mismas opciones (`--filter-trait`, `--list-tests`…). Para
-   microbenchmarks de operadores, tokenizador y kernels se emplea
-   **BenchmarkDotNet** (con `[MemoryDiagnoser]` para auditar `0 B` alojados en
-   el *Managed Heap* y `[DisassemblyDiagnoser]` para inspeccionar el ensamblador
-   SIMD emitido por el JIT), complementado con mediciones de *throughput*
-   (*prefill* y *decode* en tokens/s y ancho de banda efectivo en GB/s) mediante
-   `Stopwatch.GetTimestamp()` en `Simply.Cli`.
+   casos acepta las mismas opciones (`--filter-trait`, `--list-tests`…). Los
+   benchmarks son un comando de la propia herramienta, no un ejecutable aparte:
+   viven en `src/Simply.Benchmarks` y se lanzan como suites de
+   `simply bench <suite>` (`memory`, más adelante `model` y `ops`), con
+   **BenchmarkDotNet** ejecutado dentro del proceso de `simply` para que
+   también funcione con la herramienta publicada. Solo miden compilaciones
+   Release (`dotnet run -c Release --project src/Simply.Cli -- bench memory`).
+   Para operadores, tokenizador y kernels se usa `[MemoryDiagnoser]` para
+   auditar `0 B` alojados en el *Managed Heap* y `[DisassemblyDiagnoser]` para
+   inspeccionar el ensamblador SIMD emitido por el JIT; el *throughput* del
+   motor (*prefill* y *decode* en tokens/s y ancho de banda efectivo en GB/s)
+   se medirá con `Stopwatch.GetTimestamp()` en la suite `model`.
 
 ## Organización del código
 
@@ -133,15 +139,21 @@ src/
 │   ├── Interop/             enlaces [LibraryImport] para libcudart, libcublas y libcuda
 │   └── Models/              arquitecturas Transformer, capas, GQA y KV Cache
 ├── Simply.Kernels/          archivos fuente CUDA (.cu) compilados a .ptx/.cubin
-└── Simply.Cli/              ejecutable de consola para inspección GGUF, benchmarks e inferencia
+├── Simply.Benchmarks/       suites de BenchmarkDotNet que lanza `simply bench`
+└── Simply.Cli/              herramienta `simply`: un comando por función del motor
+                             (System.CommandLine), cada uno en Commands/
 tests/
+├── Simply.Cli.Tests/        tests del árbol de comandos de `simply`
 └── Simply.Core.Tests/       tests unitarios (xUnit) y de verificación matemática por fase/hito
 ```
 
-Las dependencias fluyen `Simply.Cli -> Simply.Core`. `Simply.Core` no depende de
-la interfaz de consola para que toda la lógica de parseo, tokenización, memoria
-y operadores matemáticos pueda probarse de forma aislada desde
-`Simply.Core.Tests`.
+Las dependencias fluyen `Simply.Cli -> Simply.Benchmarks -> Simply.Core` (y
+`Simply.Cli -> Simply.Core`). `Simply.Cli` genera un único
+ejecutable, `simply`, con subcomandos al estilo de `docker` (`simply bench`,
+más adelante `simply run`…); cada comando se añade cuando funciona, sin
+esqueletos en la ayuda. `Simply.Core` no depende de la interfaz de consola
+para que toda la lógica de parseo, tokenización, memoria y operadores
+matemáticos pueda probarse de forma aislada desde `Simply.Core.Tests`.
 
 ## OpenSpec
 

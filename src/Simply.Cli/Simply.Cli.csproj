@@ -3,10 +3,17 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>Simply.Cli</RootNamespace>
+    <AssemblyName>simply</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.CommandLine" />
+    <ProjectReference Include="..\Simply.Benchmarks\Simply.Benchmarks.csproj" />
     <ProjectReference Include="..\Simply.Core\Simply.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Simply.Cli.Tests" />
   </ItemGroup>
 
 </Project>
