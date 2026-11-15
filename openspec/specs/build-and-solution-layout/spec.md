@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define la estructura de solución `.slnx`, los directorios estándar (`eng/`, `artifacts/`, `src/`, `tests/`), los manifiestos JSON de SDK y herramientas (`global.json`, `dotnet-tools.json`), las propiedades globales de compilación y estilo (`.editorconfig`, `Directory.Build.props`), y la gestión centralizada de paquetes (`Directory.Packages.props`) junto con la política de dependencias de producción.
+Define la estructura de solución `.slnx`, los directorios estándar (`eng/`, `artifacts/`, `src/`, `tests/`), los manifiestos JSON de SDK y herramientas (`global.json`, `dotnet-tools.json`), las propiedades globales de compilación y estilo (`.editorconfig`, `Directory.Build.props`), la gestión centralizada de paquetes (`Directory.Packages.props`) junto con la política de dependencias de producción, y la plataforma sobre la que se ejecutan los tests.
 
 ## Requirements
 
@@ -67,3 +67,18 @@ El proyecto `Simply.Cli` SHALL incluir un `Program.cs` inicial mínimo que final
 #### Scenario: Running the unit test suite
 - **WHEN** se ejecuta `dotnet test Simply.slnx`
 - **THEN** el corredor de `xUnit v3` descubre y ejecuta los tests de `Simply.Core.Tests` finalizando con `0` fallos
+
+### Requirement: Tests on Microsoft.Testing.Platform
+Los proyectos de tests SHALL ejecutarse sobre Microsoft.Testing.Platform, que `global.json` selecciona como corredor de `dotnet test`, y MUST NOT depender de VSTest.
+
+#### Scenario: dotnet test runs on Microsoft.Testing.Platform
+- **WHEN** se ejecuta `dotnet test Simply.slnx` en la raíz del repositorio
+- **THEN** el SDK aplica `"test": { "runner": "Microsoft.Testing.Platform" }` de `global.json` y ejecuta cada proyecto de tests como aplicación de Microsoft.Testing.Platform
+
+#### Scenario: No VSTest integration
+- **WHEN** se inspeccionan los proyectos de tests y `Directory.Packages.props`
+- **THEN** no aparecen los paquetes de VSTest (`Microsoft.NET.Test.Sdk`, `xunit.runner.visualstudio`) ni `IsTestingPlatformApplication` en `false`
+
+#### Scenario: Test project runs as a standalone executable
+- **WHEN** se ejecuta `dotnet run --project tests/Simply.Core.Tests`
+- **THEN** la suite se ejecuta sobre Microsoft.Testing.Platform sin pasar por `dotnet test` y termina con código de salida `0`, y el ejecutable acepta las mismas opciones que `dotnet test`, como `--list-tests` o `--filter-trait`

@@ -76,8 +76,10 @@ requiere un cambio de OpenSpec aprobado y fija su versión en
    el símbolo real. Reservar `[SuppressGCTransition]` para funciones nativas
    triviales (menos de 1 µs, sin bloqueos) en las que una medición demuestre
    beneficio; no usarlo en llamadas de CUDA.
-4. **Configuración de compilación:** el SDK de .NET 10 se fija en `global.json`
-   y el manifiesto de herramientas locales en `dotnet-tools.json`. Todos los
+4. **Configuración de compilación:** el SDK de .NET 10 se fija en `global.json`,
+   que también selecciona Microsoft.Testing.Platform como corredor de
+   `dotnet test`, y el manifiesto de herramientas locales en
+   `dotnet-tools.json`. Todos los
    proyectos C# heredan de `Directory.Build.props` `net10.0` con `LangVersion`
    en C# 14, `<Nullable>enable</Nullable>`,
    `<ImplicitUsings>enable</ImplicitUsings>`,
@@ -100,7 +102,12 @@ requiere un cambio de OpenSpec aprobado y fija su versión en
    - **Llaves** en todas las sentencias de control (IDE0011) y ninguna
      directiva `using` sin usar (IDE0005).
 5. **Testing y benchmarking:** los tests unitarios y de verificación matemática
-   se escriben con **xUnit** (`xunit.v3`) en `tests/Simply.Core.Tests`. Para
+   se escriben con **xUnit** (`xunit.v3`) en `tests/Simply.Core.Tests` y se
+   ejecutan sobre **Microsoft.Testing.Platform**, sin VSTest ni sus paquetes
+   (`Microsoft.NET.Test.Sdk`, `xunit.runner.visualstudio`). El proyecto de
+   tests es un ejecutable: se lanza con `dotnet test`, con
+   `dotnet run --project tests/Simply.Core.Tests` o directamente, y en los tres
+   casos acepta las mismas opciones (`--filter-trait`, `--list-tests`…). Para
    microbenchmarks de operadores, tokenizador y kernels se emplea
    **BenchmarkDotNet** (con `[MemoryDiagnoser]` para auditar `0 B` alojados en
    el *Managed Heap* y `[DisassemblyDiagnoser]` para inspeccionar el ensamblador

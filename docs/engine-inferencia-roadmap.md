@@ -157,7 +157,7 @@ Buenas prácticas:
 
 **Construcción.**
 
-1. **CI** en GitHub Actions (`pull_request` y `workflow_dispatch`) con `dotnet format --verify-no-changes`, `dotnet build -warnaserror` y `dotnet test`. Los *runners* no tienen modelos ni GPU, así que excluye los tests marcados con los *traits* `RequiresModel` y `RequiresGpu`.
+1. **CI** en GitHub Actions (`pull_request` y `workflow_dispatch`) con `dotnet format --verify-no-changes`, `dotnet build -warnaserror` y `dotnet test`. Los *runners* no tienen modelos ni GPU, así que excluye los tests marcados con los *traits* `RequiresModel` y `RequiresGpu` (`--filter-not-trait`). Los tests corren sobre Microsoft.Testing.Platform: si el filtro deja un proyecto sin tests, ese proyecto termina con el código de salida 8 y `dotnet test` falla, salvo que se añada `--ignore-exit-code 8` (comprobado).
 2. **Script de modelos** en `eng/`, que descargue los modelos de referencia a `artifacts/models/` y verifique su SHA-256.
 3. **llama.cpp** compilado en sus dos variantes, con el commit fijado.
 4. **Medición del hardware**: ancho de banda de RAM y VRAM con microbenchmarks propios, y velocidad de llama.cpp con `llama-bench`.
