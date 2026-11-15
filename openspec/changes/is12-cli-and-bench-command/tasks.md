@@ -17,7 +17,7 @@
 
 ## 3. Initial review bookkeeping
 
-- [ ] 3.1 Marcar en la lista de acciones de `docs/revision-inicial.md` el proyecto de benchmarks del punto 1.4 como hecho, con el commit del grupo 2, y añadir la nota de seguimiento en la cabecera; verificar que los enlaces del documento resuelven
+- [x] 3.1 Marcar en la lista de acciones de `docs/revision-inicial.md` el proyecto de benchmarks del punto 1.4 como hecho, con el commit del grupo 2, y añadir la nota de seguimiento en la cabecera; verificar que los enlaces del documento resuelven
 
 ## Workflow follow-up
 

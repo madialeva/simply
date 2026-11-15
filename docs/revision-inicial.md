@@ -15,6 +15,7 @@ Cómo leer este documento:
 - **Seguimiento (2026-11-15, `72c5c8e`, #6).** La hoja de ruta se reescribió en [engine-inferencia-roadmap.md](engine-inferencia-roadmap.md) incorporando las recomendaciones de la sección 2, y la primera versión se eliminó. Además, se decidió permitir paquetes NuGet de infraestructura como `System.Numerics.Tensors` (punto 1.2), y la spec `build-and-solution-layout` se corrigió directamente, sin cambio de OpenSpec: recoge esa política, deja de fijar `Version` en `1.0.0` (3.2) y ya no exige que exista `artifacts/` (1.8).
 - **Seguimiento (2026-11-15, `cb7d41e`, #8).** Se completaron los detalles menores del punto 1.8: `/models/` anclado en `.gitignore`, `.gitkeep` obsoletos eliminados, salida de compilación en `artifacts/`, `README.md` y las reglas que faltaban en los analizadores.
 - **Seguimiento (2026-11-15, `88755ca`, #10).** Los tests pasaron de VSTest a Microsoft.Testing.Platform (punto 1.6) con los tres pasos de la alternativa probada, más `UseMicrosoftTestingPlatformRunner`, que da al ejecutable de tests la misma línea de comandos que `dotnet test`. La spec `build-and-solution-layout` lo recoge en un requisito nuevo, también sin cambio de OpenSpec.
+- **Seguimiento (2026-11-15, `598d944`, #12).** El punto 1.4 se resolvió de otra forma que la propuesta: los benchmarks no son un ejecutable aparte, sino una biblioteca, `src/Simply.Benchmarks`, que se lanza como `simply bench <suite>` desde la herramienta `simply`. BenchmarkDotNet salió del proyecto de tests. Se hizo con el cambio de OpenSpec `is12-cli-and-bench-command`.
 - **Cada dato indica su procedencia.** *Verificado* significa que se ejecutó una prueba en la máquina de desarrollo. *Sin verificar* significa que procede de conocimiento previo y conviene contrastarlo con la fuente antes de apoyarse en él.
 
 ## Veredicto
@@ -278,7 +279,7 @@ Las acciones marcadas están hechas, y su nota indica el commit que las incluye.
 **Antes de la fase correspondiente:**
 
 - [x] Fase 1: fijar el modelo de referencia y redefinir los hitos con llama.cpp como oráculo (2.8, 2.9). *Hecho en `72c5c8e` (#6): Qwen2.5-0.5B-Instruct, con stories260K como banco de pruebas opcional.*
-- [ ] Fase 2: test de «0 B» (1.5), proyecto de benchmarks aparte (1.4) y decisión sobre los hilos (2.2). *En parte en `72c5c8e` (#6): la hoja de ruta decide los hilos (propios, creados al arrancar) y hace del test de 0 B un criterio del Hito 2; falta decidir el proyecto de benchmarks.*
+- [ ] Fase 2: test de «0 B» (1.5), proyecto de benchmarks aparte (1.4) y decisión sobre los hilos (2.2). *En parte en `72c5c8e` (#6): la hoja de ruta decide los hilos (propios, creados al arrancar) y hace del test de 0 B un criterio del Hito 2. El proyecto de benchmarks está hecho en `598d944` (#12): `src/Simply.Benchmarks`, con sus suites detrás de `simply bench`. Queda escribir el test de 0 B, que llegará con el Hito 2.*
 - [ ] Fase 3: enlaces con `EntryPoint` versionado, hilo dedicado a la GPU y GEMV mediante GEMM (2.6). *Recogido en `72c5c8e` (#6), en la hoja de ruta (3.1 y 3.3) y, lo del `EntryPoint`, también en `AGENTS.md`; se aplicará al implementar la Fase 3.*
 - [x] Fase 4: separar en el Hito 4 la corrección del kernel y el error de cuantización (2.8). *Hecho en `72c5c8e` (#6), en la hoja de ruta.*
 
