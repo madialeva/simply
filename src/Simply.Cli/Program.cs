@@ -1,11 +1,9 @@
 namespace Simply.Cli;
 
 /// <summary>
-/// Entry point for the Simply command-line application.
+/// Entry point for the <c>simply</c> command-line tool.
 /// </summary>
 internal static class Program
 {
-    private static void Main()
-    {
-    }
+    private static int Main(string[] args) => SimplyCommand.Create().Parse(args).Invoke();
 }

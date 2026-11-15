@@ -133,15 +133,19 @@ src/
 │   ├── Interop/             enlaces [LibraryImport] para libcudart, libcublas y libcuda
 │   └── Models/              arquitecturas Transformer, capas, GQA y KV Cache
 ├── Simply.Kernels/          archivos fuente CUDA (.cu) compilados a .ptx/.cubin
-└── Simply.Cli/              ejecutable de consola para inspección GGUF, benchmarks e inferencia
+└── Simply.Cli/              herramienta `simply`: un comando por función del motor
+                             (System.CommandLine), cada uno en Commands/
 tests/
+├── Simply.Cli.Tests/        tests del árbol de comandos de `simply`
 └── Simply.Core.Tests/       tests unitarios (xUnit) y de verificación matemática por fase/hito
 ```
 
-Las dependencias fluyen `Simply.Cli -> Simply.Core`. `Simply.Core` no depende de
-la interfaz de consola para que toda la lógica de parseo, tokenización, memoria
-y operadores matemáticos pueda probarse de forma aislada desde
-`Simply.Core.Tests`.
+Las dependencias fluyen `Simply.Cli -> Simply.Core`. `Simply.Cli` genera un único
+ejecutable, `simply`, con subcomandos al estilo de `docker` (`simply bench`,
+más adelante `simply run`…); cada comando se añade cuando funciona, sin
+esqueletos en la ayuda. `Simply.Core` no depende de la interfaz de consola
+para que toda la lógica de parseo, tokenización, memoria y operadores
+matemáticos pueda probarse de forma aislada desde `Simply.Core.Tests`.
 
 ## OpenSpec
 
