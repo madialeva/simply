@@ -14,6 +14,7 @@ Cómo leer este documento:
 - **Es una foto de ese día.** Antes de actuar sobre un punto conviene comprobar que sigue vigente. La sección 5 anota qué se ha hecho desde entonces.
 - **Seguimiento (2026-11-15, `72c5c8e`, #6).** La hoja de ruta se reescribió en [engine-inferencia-roadmap.md](engine-inferencia-roadmap.md) incorporando las recomendaciones de la sección 2, y la primera versión se eliminó. Además, se decidió permitir paquetes NuGet de infraestructura como `System.Numerics.Tensors` (punto 1.2), y la spec `build-and-solution-layout` se corrigió directamente, sin cambio de OpenSpec: recoge esa política, deja de fijar `Version` en `1.0.0` (3.2) y ya no exige que exista `artifacts/` (1.8).
 - **Seguimiento (2026-11-15, `cb7d41e`, #8).** Se completaron los detalles menores del punto 1.8: `/models/` anclado en `.gitignore`, `.gitkeep` obsoletos eliminados, salida de compilación en `artifacts/`, `README.md` y las reglas que faltaban en los analizadores.
+- **Seguimiento (2026-11-15, `88755ca`, #10).** Los tests pasaron de VSTest a Microsoft.Testing.Platform (punto 1.6) con los tres pasos de la alternativa probada, más `UseMicrosoftTestingPlatformRunner`, que da al ejecutable de tests la misma línea de comandos que `dotnet test`. La spec `build-and-solution-layout` lo recoge en un requisito nuevo, también sin cambio de OpenSpec.
 - **Cada dato indica su procedencia.** *Verificado* significa que se ejecutó una prueba en la máquina de desarrollo. *Sin verificar* significa que procede de conocimiento previo y conviene contrastarlo con la fuente antes de apoyarse en él.
 
 ## Veredicto
@@ -283,7 +284,7 @@ Las acciones marcadas están hechas, y su nota indica el commit que las incluye.
 
 **Opcionales:**
 
-- [ ] Pasar los tests a Microsoft.Testing.Platform (1.6).
+- [x] Pasar los tests a Microsoft.Testing.Platform (1.6). *Hecho en `88755ca` (#10): `global.json` selecciona la plataforma, y el proyecto de tests prescinde de `IsTestingPlatformApplication` y de los paquetes de VSTest. Ahora expone la capacidad `TestingPlatformServer`, con la que C# Dev Kit elige la plataforma nueva en el explorador de tests (comprobado en el proyecto, no en el editor).*
 - [x] Activar `UseArtifactsOutput` (1.8). *Hecho en `cb7d41e` (#8): toda la salida de compilación va a `artifacts/`.*
 - [x] Añadir reglas de nombres a `.editorconfig` (1.8). *Hecho en `cb7d41e` (#8), junto con el resto de huecos de los analizadores: `using` sin usar (IDE0005), llaves (IDE0011) y comentarios XML en los miembros públicos del código de producción (CS1591).*
 - [ ] Decidir sobre los puntos de proceso de la sección 3. *En parte en `72c5c8e` (#6): la spec ya no fija `Version` en `1.0.0` ni enumera los paquetes de test (3.2); quedan 3.1, 3.3 y 3.4.*

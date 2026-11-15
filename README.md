@@ -30,11 +30,11 @@ The reference model is [Qwen2.5-0.5B-Instruct](https://huggingface.co/Qwen/Qwen2
 | Native interop | Source-generated `[LibraryImport]` bindings | Calls into the CUDA libraries |
 | GPU | CUDA 13: Driver API (`libcuda`) and cuBLAS (`libcublas`) | Device memory, kernel launches and FP16 matrix products |
 | GPU kernels | CUDA C++ compiled with `nvcc` to PTX and cubin | Normalization, RoPE, attention and quantized matrix-vector products |
-| Testing | xUnit v3 | Unit tests and numerical checks |
+| Testing | xUnit v3 on Microsoft.Testing.Platform | Unit tests and numerical checks, run with `dotnet test` or as a standalone executable |
 | Performance | BenchmarkDotNet, Nsight Systems (`nsys`), Nsight Compute (`ncu`) | CPU micro-benchmarks, GPU timelines and per-kernel metrics |
 | Models | GGUF files from Hugging Face | Weights, tokenizer and model metadata |
 | Reference | llama.cpp (`llama-tokenize`, `llama-eval-callback`, `llama-perplexity`, `llama-bench`) | Oracle for tokens, intermediate tensors, perplexity and speed; never a dependency |
-| Build | .NET SDK pinned in `global.json`, `Simply.slnx`, Central Package Management, `Directory.Build.props`, `.editorconfig` with analyzers | Reproducible builds with warnings treated as errors |
+| Build | .NET SDK and test runner set in `global.json`, `Simply.slnx`, Central Package Management, `Directory.Build.props`, `.editorconfig` with analyzers | Reproducible builds with warnings treated as errors |
 | Specs | [OpenSpec](https://github.com/Fission-AI/OpenSpec) | Spec-driven changes, stored in `openspec/` |
 | Project management | GitHub issues, milestones, Projects and pull requests; GitHub Actions (planned) | Planning, review and continuous integration |
 | AI agents | [AGENTS.md](AGENTS.md) | Conventions for AI coding assistants |
@@ -57,6 +57,13 @@ dotnet format Simply.slnx --verify-no-changes
 ```
 
 Build outputs go to `artifacts/`, which git ignores.
+
+The tests run on [Microsoft.Testing.Platform](https://learn.microsoft.com/dotnet/core/testing/microsoft-testing-platform-intro), which `global.json` selects for `dotnet test`. The test project is also an executable that takes the same options as `dotnet test`, for example:
+
+```bash
+dotnet run --project tests/Simply.Core.Tests -- --list-tests
+dotnet run --project tests/Simply.Core.Tests -- --filter-class Simply.Core.Tests.EngineInfoTests
+```
 
 ## Repository layout
 
