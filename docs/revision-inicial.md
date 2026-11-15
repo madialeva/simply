@@ -12,7 +12,8 @@ Cómo leer este documento:
 
 - **Son recomendaciones pendientes de decisión, no convenciones del proyecto.** Si algo contradice a [AGENTS.md](../AGENTS.md), prevalece `AGENTS.md` hasta que un cambio aprobado diga lo contrario.
 - **Es una foto de ese día.** Antes de actuar sobre un punto conviene comprobar que sigue vigente. La sección 5 anota qué se ha hecho desde entonces.
-- **Seguimiento (2026-11-15).** La hoja de ruta se reescribió en [engine-inferencia-roadmap.md](engine-inferencia-roadmap.md) incorporando las recomendaciones de la sección 2, y la primera versión se eliminó. Además, se decidió permitir paquetes NuGet de infraestructura como `System.Numerics.Tensors` (punto 1.2), y la spec `build-and-solution-layout` se corrigió directamente, sin cambio de OpenSpec: recoge esa política, deja de fijar `Version` en `1.0.0` (3.2) y ya no exige que exista `artifacts/` (1.8).
+- **Seguimiento (2026-11-15, `72c5c8e`, #6).** La hoja de ruta se reescribió en [engine-inferencia-roadmap.md](engine-inferencia-roadmap.md) incorporando las recomendaciones de la sección 2, y la primera versión se eliminó. Además, se decidió permitir paquetes NuGet de infraestructura como `System.Numerics.Tensors` (punto 1.2), y la spec `build-and-solution-layout` se corrigió directamente, sin cambio de OpenSpec: recoge esa política, deja de fijar `Version` en `1.0.0` (3.2) y ya no exige que exista `artifacts/` (1.8).
+- **Seguimiento (2026-11-15, `cb7d41e`, #8).** Se completaron los detalles menores del punto 1.8: `/models/` anclado en `.gitignore`, `.gitkeep` obsoletos eliminados, salida de compilación en `artifacts/`, `README.md` y las reglas que faltaban en los analizadores.
 - **Cada dato indica su procedencia.** *Verificado* significa que se ejecutó una prueba en la máquina de desarrollo. *Sin verificar* significa que procede de conocimiento previo y conviene contrastarlo con la fuente antes de apoyarse en él.
 
 ## Veredicto
@@ -257,35 +258,35 @@ El objetivo declarado es aprender. Si el agente escribe la propuesta, el diseño
 
 ## 5. Lista de acciones propuestas
 
-Ninguna está aprobada. Las que afectan a specs o a `AGENTS.md` pasan por el flujo habitual del proyecto.
+Las acciones marcadas están hechas, y su nota indica el commit que las incluye. Las pendientes no están aprobadas: las que afectan a specs o a `AGENTS.md` pasan por el flujo habitual del proyecto.
 
 **Ahora (ediciones de minutos):**
 
-- [ ] Renombrar la hoja de ruta, actualizar `AGENTS.md` y versionar `docs/` (1.1). *En parte (2026-11-15): renombrada a `engine-inferencia-roadmap.md` y referenciada desde `AGENTS.md`; falta versionar `docs/`.*
-- [x] Decidir la política sobre `System.Numerics.Tensors` y reflejarla en `config.yaml` y en la spec (1.2). *Hecho el 2026-11-15: se permiten paquetes de infraestructura, recogido en `AGENTS.md`, `config.yaml`, la hoja de ruta y la spec `build-and-solution-layout`.*
-- [ ] Renombrar `BlockQ4_Custom` y añadir `exclude_structs` de `CA1051` (1.3). *En parte (2026-11-15): renombrado a `BlockQ4` en `AGENTS.md` y la hoja de ruta; falta `.editorconfig`.*
-- [x] Retirar el «siempre» de `[SuppressGCTransition]` en `AGENTS.md`, `config.yaml` y la hoja de ruta (2.1). *Hecho el 2026-11-15.*
-- [x] Corregir en la hoja de ruta `NativeArena`, `TensorView`, AVX-512 y FP16, los nombres de librerías y las erratas (2.3, 2.4, 2.5, 2.10). *Hecho el 2026-11-15, con la reescritura.*
-- [ ] Anclar `/models/` en `.gitignore` y borrar los `.gitkeep` obsoletos (1.8).
+- [x] Renombrar la hoja de ruta, actualizar `AGENTS.md` y versionar `docs/` (1.1). *Hecho en `72c5c8e` (#6): renombrada a `engine-inferencia-roadmap.md`, referenciada desde `AGENTS.md` y `docs/` versionado.*
+- [x] Decidir la política sobre `System.Numerics.Tensors` y reflejarla en `config.yaml` y en la spec (1.2). *Hecho en `72c5c8e` (#6): se permiten paquetes de infraestructura, recogido en `AGENTS.md`, `config.yaml`, la hoja de ruta y la spec `build-and-solution-layout`.*
+- [ ] Renombrar `BlockQ4_Custom` y añadir `exclude_structs` de `CA1051` (1.3). *En parte en `72c5c8e` (#6): renombrado a `BlockQ4` en `AGENTS.md` y la hoja de ruta; falta `.editorconfig`.*
+- [x] Retirar el «siempre» de `[SuppressGCTransition]` en `AGENTS.md`, `config.yaml` y la hoja de ruta (2.1). *Hecho en `72c5c8e` (#6).*
+- [x] Corregir en la hoja de ruta `NativeArena`, `TensorView`, AVX-512 y FP16, los nombres de librerías y las erratas (2.3, 2.4, 2.5, 2.10). *Hecho en `72c5c8e` (#6), con la reescritura.*
+- [x] Anclar `/models/` en `.gitignore` y borrar los `.gitkeep` obsoletos (1.8). *Hecho en `cb7d41e` (#8).*
 
 **Siguiente cambio:**
 
-- [ ] CI con *traits* para GPU y modelos (1.7).
-- [ ] README con requisitos y arranque de herramientas (1.8).
+- [ ] CI con *traits* para GPU y modelos (1.7). *Pendiente en #3, del milestone «Phase 0: Test Bench».*
+- [x] README con requisitos y arranque de herramientas (1.8). *Hecho en `cb7d41e` (#8): `README.md` con la visión general del proyecto, el stack tecnológico, los requisitos, la compilación y el uso de OpenSpec.*
 
 **Antes de la fase correspondiente:**
 
-- [x] Fase 1: fijar el modelo de referencia y redefinir los hitos con llama.cpp como oráculo (2.8, 2.9). *Hecho el 2026-11-15: Qwen2.5-0.5B-Instruct, con stories260K como banco de pruebas opcional.*
-- [ ] Fase 2: test de «0 B» (1.5), proyecto de benchmarks aparte (1.4) y decisión sobre los hilos (2.2).
-- [ ] Fase 3: enlaces con `EntryPoint` versionado, hilo dedicado a la GPU y GEMV mediante GEMM (2.6).
-- [x] Fase 4: separar en el Hito 4 la corrección del kernel y el error de cuantización (2.8). *Hecho el 2026-11-15, en la hoja de ruta.*
+- [x] Fase 1: fijar el modelo de referencia y redefinir los hitos con llama.cpp como oráculo (2.8, 2.9). *Hecho en `72c5c8e` (#6): Qwen2.5-0.5B-Instruct, con stories260K como banco de pruebas opcional.*
+- [ ] Fase 2: test de «0 B» (1.5), proyecto de benchmarks aparte (1.4) y decisión sobre los hilos (2.2). *En parte en `72c5c8e` (#6): la hoja de ruta decide los hilos (propios, creados al arrancar) y hace del test de 0 B un criterio del Hito 2; falta decidir el proyecto de benchmarks.*
+- [ ] Fase 3: enlaces con `EntryPoint` versionado, hilo dedicado a la GPU y GEMV mediante GEMM (2.6). *Recogido en `72c5c8e` (#6), en la hoja de ruta (3.1 y 3.3) y, lo del `EntryPoint`, también en `AGENTS.md`; se aplicará al implementar la Fase 3.*
+- [x] Fase 4: separar en el Hito 4 la corrección del kernel y el error de cuantización (2.8). *Hecho en `72c5c8e` (#6), en la hoja de ruta.*
 
 **Opcionales:**
 
 - [ ] Pasar los tests a Microsoft.Testing.Platform (1.6).
-- [ ] Activar `UseArtifactsOutput` (1.8).
-- [ ] Añadir reglas de nombres a `.editorconfig` (1.8).
-- [ ] Decidir sobre los puntos de proceso de la sección 3.
+- [x] Activar `UseArtifactsOutput` (1.8). *Hecho en `cb7d41e` (#8): toda la salida de compilación va a `artifacts/`.*
+- [x] Añadir reglas de nombres a `.editorconfig` (1.8). *Hecho en `cb7d41e` (#8), junto con el resto de huecos de los analizadores: `using` sin usar (IDE0005), llaves (IDE0011) y comentarios XML en los miembros públicos del código de producción (CS1591).*
+- [ ] Decidir sobre los puntos de proceso de la sección 3. *En parte en `72c5c8e` (#6): la spec ya no fija `Version` en `1.0.0` ni enumera los paquetes de test (3.2); quedan 3.1, 3.3 y 3.4.*
 
 ## Apéndice A. Mediciones
 
@@ -415,6 +416,6 @@ A tener en cuenta:
 - **No forman parte de `Simply.slnx`.** No los compila la solución ni los cubrirá el CI, así que pueden quedarse atrás si cambian las reglas del repositorio.
 - **Heredan `Directory.Build.props`.** Por eso sus `.csproj` son mínimos y solo funcionan dentro del repositorio.
 - **`CpuProbes` usa el paquete `System.Numerics.Tensors` 10.0.15.** Desactiva la gestión central de paquetes solo en su proyecto, para no añadirlo a `Directory.Packages.props`. No es una dependencia de producción.
-- **Generan ficheros que git ignora:** `bin/`, `obj/` y `kernels.ptx`.
+- **Generan ficheros que git ignora:** su compilación va a `artifacts/`, y `kernels.ptx` queda junto a su `.cu`.
 - **El `FlawedArena` de `CpuProbes` es el `NativeArena` de la hoja de ruta, reproducido con sus fallos a propósito.** No debe reutilizarse: la versión corregida está en [engine-inferencia-roadmap.md](engine-inferencia-roadmap.md).
 - **`GpuKernelLaunch` necesita una GPU de NVIDIA con su driver y el toolkit de CUDA.**
