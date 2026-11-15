@@ -74,3 +74,7 @@ artifacts/            build outputs and downloaded models, not versioned
 ## Working with OpenSpec
 
 Install the CLI with `npm install -g @fission-ai/openspec` and check the specs with `openspec validate --all --strict`. The instruction files that OpenSpec generates for each AI assistant (`.agents/`, `.claude/`…) are local and ignored by git. After cloning, `openspec init --tools <tool>` generates them again while keeping `openspec/config.yaml`, and `openspec update` keeps them current.
+
+## License
+
+Simply is released under the [MIT License](LICENSE).
