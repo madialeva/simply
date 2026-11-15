@@ -83,10 +83,22 @@ requiere un cambio de OpenSpec aprobado y fija su versión en
    `<ImplicitUsings>enable</ImplicitUsings>`,
    `<AllowUnsafeBlocks>true</AllowUnsafeBlocks>`,
    `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`,
-   `<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>` y
-   `<AnalysisLevel>latest-recommended</AnalysisLevel>`, con las reglas de estilo
-   en `.editorconfig`. El código debe pasar `dotnet format --verify-no-changes`
-   y compilar sin advertencias (`dotnet build -warnaserror`).
+   `<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>`,
+   `<AnalysisLevel>latest-recommended</AnalysisLevel>`,
+   `<GenerateDocumentationFile>true</GenerateDocumentationFile>` y
+   `<UseArtifactsOutput>true</UseArtifactsOutput>` (toda la salida de
+   compilación va a `artifacts/`), con las reglas de estilo en `.editorconfig`.
+   El código debe pasar `dotnet format --verify-no-changes` y compilar sin
+   advertencias (`dotnet build -warnaserror`). La compilación hace cumplir:
+   - **Nombres (IDE1006):** tipos, métodos, propiedades, constantes y campos
+     públicos en PascalCase; interfaces con prefijo `I` y parámetros de tipo
+     con `T`; campos privados e internos en `_camelCase`; parámetros y
+     variables locales en camelCase. Los enlaces `[LibraryImport]` conservan
+     el nombre de la función nativa (`cuMemAlloc`).
+   - **Comentarios XML (CS1591)** en los miembros públicos del código de
+     producción; los tests están exentos.
+   - **Llaves** en todas las sentencias de control (IDE0011) y ninguna
+     directiva `using` sin usar (IDE0005).
 5. **Testing y benchmarking:** los tests unitarios y de verificación matemática
    se escriben con **xUnit** (`xunit.v3`) en `tests/Simply.Core.Tests`. Para
    microbenchmarks de operadores, tokenizador y kernels se emplea
